@@ -27,12 +27,21 @@ class MyApp extends StatelessWidget {
         //     color: Colors.orange.shade100,
         //     child: ProgressBarSingleChild(
         //       barColor: Colors.red,
-        //       child: Container(width: 100, height: 100, color: Colors.black),
+        //       child: Container(width: 20, height: 20, color: Colors.black),
         //     ),
         //   ),
         // ),
-        body: const Center(
-          child: Text('coming soon...'),
+        // body: const Center(
+        //   child: Text('coming soon...'),
+        // ),
+        body: Center(
+          child: Tint(
+            color: Color.fromARGB(40, 255, 0, 0),
+            child: Text(
+              'Hello World!',
+              textDirection: TextDirection.ltr,
+            ),
+          ),
         ),
       ),
     );
