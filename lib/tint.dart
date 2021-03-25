@@ -1,4 +1,4 @@
-/// Source: https://nicksnettravels.builttoroam.com/create-a-flutter-widget/
+/// Credit: https://nicksnettravels.builttoroam.com/create-a-flutter-widget/
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
@@ -10,11 +10,11 @@ class Tint extends SingleChildRenderObjectWidget {
   final Color color;
 
   @override
-  RenderTint createRenderObject(BuildContext context) =>
-      RenderTint(color: color);
+  _RenderTint createRenderObject(BuildContext context) =>
+      _RenderTint(color: color);
 
   @override
-  void updateRenderObject(BuildContext context, RenderTint renderObject) =>
+  void updateRenderObject(BuildContext context, _RenderTint renderObject) =>
       renderObject..color = color;
 
   @override
@@ -24,8 +24,8 @@ class Tint extends SingleChildRenderObjectWidget {
   }
 }
 
-class RenderTint extends RenderProxyBox {
-  RenderTint({Color color = const Color(0x00000000), RenderBox? child})
+class _RenderTint extends RenderProxyBox {
+  _RenderTint({Color color = const Color(0x00000000), RenderBox? child})
       : _color = color,
         super(child);
 

@@ -34,12 +34,21 @@ class MyApp extends StatelessWidget {
         // body: const Center(
         //   child: Text('coming soon...'),
         // ),
+        // body: Center(
+        //   child: Tint(
+        //     color: Color.fromARGB(40, 255, 0, 0),
+        //     child: Text(
+        //       'Hello World!',
+        //       textDirection: TextDirection.ltr,
+        //     ),
+        //   ),
+        // ),
         body: Center(
-          child: Tint(
-            color: Color.fromARGB(40, 255, 0, 0),
-            child: Text(
-              'Hello World!',
-              textDirection: TextDirection.ltr,
+          child: ColoredBox(
+            color: Colors.brown.shade100,
+            child: SimpleStepper(
+              activeColor: Colors.orange.shade700,
+              steps: <Widget>[],
             ),
           ),
         ),

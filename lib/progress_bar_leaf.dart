@@ -1,4 +1,4 @@
-/// Source: https://medium.com/flutter-community/creating-a-flutter-widget-from-scratch-a9c01c47c630
+/// Credit: https://medium.com/flutter-community/creating-a-flutter-widget-from-scratch-a9c01c47c630
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
