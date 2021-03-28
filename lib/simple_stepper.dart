@@ -12,12 +12,17 @@ class SimpleStepper extends MultiChildRenderObjectWidget {
   _RenderSimpleStepper createRenderObject(BuildContext context) =>
       _RenderSimpleStepper(
           activeColor: activeColor ?? Theme.of(context).primaryColor);
+
+  @override
+  void updateRenderObject(
+          BuildContext context, _RenderSimpleStepper renderObject) =>
+      renderObject..activeColor = activeColor!;
 }
 
-class SimpleStep extends ContainerBoxParentData<RenderBox> {}
+class SimpleStepperParentData extends ContainerBoxParentData<RenderBox> {}
 
 class _RenderSimpleStepper extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, SimpleStep> {
+    with ContainerRenderObjectMixin<RenderBox, SimpleStepperParentData> {
   _RenderSimpleStepper({required Color activeColor})
       : _activeColor = activeColor;
 
@@ -31,10 +36,17 @@ class _RenderSimpleStepper extends RenderBox
   }
 
   @override
-  void setupParentData(RenderObject child) {}
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SimpleStepperParentData) {
+      child.parentData = SimpleStepperParentData();
+    }
+  }
 
   @override
   void performLayout() {
+    if (childCount > 0) {
+      firstChild!.layout(constraints, parentUsesSize: true);
+    }
     size = computeDryLayout(constraints);
   }
 
@@ -57,9 +69,15 @@ class _RenderSimpleStepper extends RenderBox
     context.canvas.drawLine(point1, point2, activePaint);
 
     if (childCount > 0) {
-      final center =
+      final childCenter =
+          Offset(firstChild!.size.width / 2, firstChild!.size.width / 2);
+      final parentCenter =
           Offset((point1.dx + point2.dx) / 2, (point1.dy + point2.dy) / 2);
-      context.paintChild(firstChild!, center);
+      context.paintChild(
+        firstChild!,
+        Offset(
+            parentCenter.dx - childCenter.dx, parentCenter.dy - childCenter.dy),
+      );
     }
 
     context.canvas.restore();

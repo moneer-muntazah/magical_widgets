@@ -63,9 +63,10 @@ class _RenderProgressBarSingleChild extends RenderProxyBox {
 
     if (child != null) {
       context.paintChild(
-          child!,
-          Offset(size.width / 2 - child!.size.width / 2,
-              size.height / 2 - child!.size.width / 2));
+        child!,
+        Offset(size.width / 2 - child!.size.width / 2,
+            size.height / 2 - child!.size.width / 2),
+      );
     }
 
     final barPaint = Paint()

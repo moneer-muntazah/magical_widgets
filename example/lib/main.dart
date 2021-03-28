@@ -48,7 +48,9 @@ class MyApp extends StatelessWidget {
             color: Colors.brown.shade100,
             child: SimpleStepper(
               activeColor: Colors.orange.shade700,
-              steps: <Widget>[],
+              steps: <Widget>[
+                Container(color: Colors.black, height: 20, width: 20)
+              ],
             ),
           ),
         ),
