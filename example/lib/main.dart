@@ -43,15 +43,25 @@ class MyApp extends StatelessWidget {
         //     ),
         //   ),
         // ),
+        // body: Center(
+        //   child: ColoredBox(
+        //     color: Colors.brown.shade100,
+        //     child: SimpleStepper(
+        //       activeColor: Colors.orange.shade700,
+        //       steps: <SimpleStep>[
+        //         SimpleStep(text: 'text', status: SimpleStepStatus.present)
+        //       ],
+        //     ),
+        //   ),
+        // ),
         body: Center(
-          child: ColoredBox(
-            color: Colors.brown.shade100,
-            child: SimpleStepper(
-              activeColor: Colors.orange.shade700,
-              steps: <Widget>[
-                Container(color: Colors.black, height: 20, width: 20)
-              ],
-            ),
+          child: FlexSimpleStepper(
+            steps: <FlexSimpleStep>[
+              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.done),
+              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.active),
+              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.active),
+              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.active),
+            ],
           ),
         ),
       ),

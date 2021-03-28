@@ -1,9 +1,12 @@
 /// Credit: https://stackoverflow.com/questions/61863958/how-can-i-paint-a-widget-on-a-canvas-in-flutter
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'simple_step.dart';
+
+export 'simple_step.dart';
 
 class SimpleStepper extends MultiChildRenderObjectWidget {
-  SimpleStepper({Key? key, this.activeColor, required List<Widget> steps})
+  SimpleStepper({Key? key, this.activeColor, required List<SimpleStep> steps})
       : super(key: key, children: steps);
 
   final Color? activeColor;
@@ -11,18 +14,20 @@ class SimpleStepper extends MultiChildRenderObjectWidget {
   @override
   _RenderSimpleStepper createRenderObject(BuildContext context) =>
       _RenderSimpleStepper(
-          activeColor: activeColor ?? Theme.of(context).primaryColor);
+          activeColor: activeColor ?? Theme
+              .of(context)
+              .primaryColor);
 
   @override
-  void updateRenderObject(
-          BuildContext context, _RenderSimpleStepper renderObject) =>
+  void updateRenderObject(BuildContext context,
+      _RenderSimpleStepper renderObject) =>
       renderObject..activeColor = activeColor!;
 }
 
-class SimpleStepperParentData extends ContainerBoxParentData<RenderBox> {}
+class _SimpleStepperParentData extends ContainerBoxParentData<RenderBox> {}
 
 class _RenderSimpleStepper extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, SimpleStepperParentData> {
+    with ContainerRenderObjectMixin<RenderBox, _SimpleStepperParentData> {
   _RenderSimpleStepper({required Color activeColor})
       : _activeColor = activeColor;
 
@@ -37,24 +42,29 @@ class _RenderSimpleStepper extends RenderBox
 
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! SimpleStepperParentData) {
-      child.parentData = SimpleStepperParentData();
+    if (child.parentData is! _SimpleStepperParentData) {
+      child.parentData = _SimpleStepperParentData();
     }
   }
 
   @override
   void performLayout() {
+    print(constraints);
     if (childCount > 0) {
-      firstChild!.layout(constraints, parentUsesSize: true);
+      firstChild!.layout(
+          constraints.copyWith(maxHeight: constraints.maxHeight / 10), parentUsesSize: true);
     }
     size = computeDryLayout(constraints);
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final desiredSize = Size(constraints.maxWidth, 50.0);
+    final desiredSize = Size(
+        constraints.maxWidth, constraints.maxHeight / 10);
     return constraints.constrain(desiredSize);
   }
+
+
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -69,10 +79,11 @@ class _RenderSimpleStepper extends RenderBox
     context.canvas.drawLine(point1, point2, activePaint);
 
     if (childCount > 0) {
+      // print(firstChild!.size);
       final childCenter =
-          Offset(firstChild!.size.width / 2, firstChild!.size.width / 2);
+      Offset(firstChild!.size.width / 2, firstChild!.size.height / 2);
       final parentCenter =
-          Offset((point1.dx + point2.dx) / 2, (point1.dy + point2.dy) / 2);
+      Offset((point1.dx + point2.dx) / 2, (point1.dy + point2.dy) / 2);
       context.paintChild(
         firstChild!,
         Offset(
