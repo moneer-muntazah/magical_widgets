@@ -23,17 +23,19 @@ class FlexSimpleStepper extends Row {
   @override
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
-        doneColor: doneColor ?? Theme.of(context).primaryColor,
-        activeColor: activeColor ?? Theme.of(context).accentColor,
-        staleColor: staleColor ?? Theme.of(context).disabledColor,
-        canceledColor: canceledColor ?? Theme.of(context).disabledColor
-      );
+          doneColor: doneColor ?? Theme.of(context).primaryColor,
+          activeColor: activeColor ?? Theme.of(context).accentColor,
+          staleColor: staleColor ?? Theme.of(context).disabledColor,
+          canceledColor: canceledColor ?? Theme.of(context).disabledColor);
 
   @override
-  void updateRenderObject(
-          BuildContext context, covariant _RenderFlexSimpleStepper renderObject) {
-
-  }
+  void updateRenderObject(BuildContext context,
+          covariant _RenderFlexSimpleStepper renderObject) =>
+      renderObject
+        ..doneColor = doneColor ?? Theme.of(context).primaryColor
+        ..activeColor = activeColor ?? Theme.of(context).accentColor
+        ..staleColor = staleColor ?? Theme.of(context).disabledColor
+        ..canceledColor = canceledColor ?? Theme.of(context).disabledColor;
 }
 
 class _RenderFlexSimpleStepper extends RenderFlex {
@@ -88,23 +90,6 @@ class _RenderFlexSimpleStepper extends RenderFlex {
 
   @override
   void defaultPaint(PaintingContext context, Offset offset) {
-    final activePaint = Paint()
-          ..color = activeColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0,
-        stalePaint = Paint()
-          ..color = staleColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0,
-        fillPaint = Paint()
-          ..color = activeColor
-          ..style = PaintingStyle.fill
-          ..strokeWidth = 2.0,
-        inProgressPaint = Paint()
-          ..color = canceledColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
-
     RenderBox? child = firstChild;
     while (child != null) {
       final childParentData = child.parentData! as FlexParentData;
@@ -117,10 +102,45 @@ class _RenderFlexSimpleStepper extends RenderFlex {
             childOffset.dy + child.size.width / 2);
         final point2 = Offset(siblingOffset.dx + sibling.size.width / 2,
             siblingOffset.dy + sibling.size.width / 2);
-        context.canvas.drawLine(point1, point2, activePaint);
+        context.canvas.drawLine(
+          point1,
+          point2,
+          Paint()
+            ..color = activeColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.0,
+        );
       }
       context.paintChild(child, childOffset);
       child = sibling;
     }
   }
+
+  // Paint _determinePaint(FlexSimpleStepStatus status) {
+  //   switch (status) {
+  //     case FlexSimpleStepStatus.done:
+  //       return Paint()
+  //         ..color = doneColor
+  //         ..style = PaintingStyle.stroke
+  //         ..strokeWidth = 2.0;
+  //     case FlexSimpleStepStatus.active:
+  //       return Paint()
+  //         ..color = activeColor
+  //         ..style = PaintingStyle.stroke
+  //         ..strokeWidth = 2.0;
+  //     default_paint:
+  //     case FlexSimpleStepStatus.stale:
+  //       return Paint()
+  //         ..color = staleColor
+  //         ..style = PaintingStyle.fill
+  //         ..strokeWidth = 2.0;
+  //     case FlexSimpleStepStatus.canceled:
+  //       return Paint()
+  //         ..color = canceledColor
+  //         ..style = PaintingStyle.stroke
+  //         ..strokeWidth = 2.0;
+  //     default:
+  //       continue default_paint;
+  //   }
+  // }
 }
