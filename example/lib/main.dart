@@ -73,11 +73,19 @@ class MyApp extends StatelessWidget {
             //   SimpleStep(label: 'three', status: SimpleStepStatus.done),
             //   SimpleStep(label: 'four', status: SimpleStepStatus.canceled),
             // ],
+            // steps: <SimpleStep>[
+            //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
+            //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
+            //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
+            //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
+            // ],
             steps: <SimpleStep>[
-              SimpleStep(label: 'one', status: SimpleStepStatus.done),
-              SimpleStep(label: 'two', status: SimpleStepStatus.active),
-              SimpleStep(label: 'three', status: SimpleStepStatus.stale),
-              SimpleStep(label: 'four', status: SimpleStepStatus.stale),
+              SimpleStep(label: 'first step', status: SimpleStepStatus.done),
+              SimpleStep(label: 'second step', status: SimpleStepStatus.done),
+              SimpleStep(label: 'third step', status: SimpleStepStatus.active),
+              SimpleStep(
+                  label: 'fourth step and my favorite',
+                  status: SimpleStepStatus.stale),
             ],
           ),
         ),

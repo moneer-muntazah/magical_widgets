@@ -45,28 +45,35 @@ class _Step extends StatelessWidget {
   const _Step({Key? key, required this.status, required this.label})
       : super(key: key);
 
+  static double _radius(BuildContext context) =>
+      MediaQuery.of(context).size.width * 0.08 / 2;
+
   final SimpleStepStatus status;
   final String label;
 
   @override
   Widget build(BuildContext context) {
+    final diameter = _radius(context) * 2;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Container(
+          height: diameter,
+          width: diameter,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             // TODO: Change hard coded color.
             color: _determineColor(context, status),
           ),
-          child: _determineChild(status),
+          child: _determineChild(diameter, status),
         ),
         Text(
           label,
           style: TextStyle(
               color: status == SimpleStepStatus.stale
                   ? SimpleStepper.of(context)?.staleColor
-                  : null),
+                  : null,
+              fontSize: diameter / 3),
         )
       ],
     );
@@ -85,16 +92,16 @@ class _Step extends StatelessWidget {
     }
   }
 
-  static Widget? _determineChild(SimpleStepStatus status) {
+  static Widget? _determineChild(double diameter, SimpleStepStatus status) {
     // TODO: Change hard coded color.
     switch (status) {
       case SimpleStepStatus.done:
-        return Icon(Icons.done, color: Colors.white);
+        return Icon(Icons.done, color: Colors.white, size: diameter / 2);
       case SimpleStepStatus.canceled:
-        return Icon(Icons.close, color: Colors.white);
+        return Icon(Icons.close, color: Colors.white, size: diameter / 2);
       case SimpleStepStatus.active:
       case SimpleStepStatus.stale:
-        return Icon(Icons.circle, color: Colors.white);
+        return Icon(Icons.circle, color: Colors.white, size: diameter);
     }
   }
 }
@@ -123,6 +130,7 @@ class SimpleStepper extends Row {
   @override
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
+          radius: _Step._radius(context),
           mainAxisAlignment: mainAxisAlignment,
           doneColor: doneColor ?? Theme.of(context).primaryColor,
           activeColor: activeColor ?? Theme.of(context).accentColor,
@@ -133,6 +141,7 @@ class SimpleStepper extends Row {
   void updateRenderObject(BuildContext context,
           covariant _RenderFlexSimpleStepper renderObject) =>
       renderObject
+        ..radius = _Step._radius(context)
         ..mainAxisAlignment = mainAxisAlignment
         ..doneColor = doneColor ?? Theme.of(context).primaryColor
         ..activeColor = activeColor ?? Theme.of(context).accentColor
@@ -142,18 +151,29 @@ class SimpleStepper extends Row {
 
 class _RenderFlexSimpleStepper extends RenderFlex {
   _RenderFlexSimpleStepper(
-      {required Color doneColor,
+      {required double radius,
+      required Color doneColor,
       required Color activeColor,
       required Color staleColor,
       required Color canceledColor,
       required MainAxisAlignment mainAxisAlignment})
-      : _doneColor = doneColor,
+      : _radius = radius,
+        _doneColor = doneColor,
         _activeColor = activeColor,
         _staleColor = staleColor,
         _canceledColor = canceledColor,
         super(
             textDirection: TextDirection.ltr,
             mainAxisAlignment: mainAxisAlignment);
+
+  double get radius => _radius;
+  double _radius;
+
+  set radius(double value) {
+    if (_radius == value) return;
+    _radius = value;
+    markNeedsLayout();
+  }
 
   Color get doneColor => _doneColor;
   Color _doneColor;
@@ -209,10 +229,9 @@ class _RenderFlexSimpleStepper extends RenderFlex {
         final siblingParentData =
             sibling.parentData as _SimpleStepperParentData;
         final siblingOffset = siblingParentData.offset + offset;
-        final point1 =
-            Offset(childOffset.dx + child.size.width / 2, childOffset.dy);
-        final point2 =
-            Offset(siblingOffset.dx + sibling.size.width / 2, siblingOffset.dy);
+        final dy = offset.dy + radius;
+        final point1 = Offset(childOffset.dx + child.size.width / 2, dy);
+        final point2 = Offset(siblingOffset.dx + sibling.size.width / 2, dy);
         context.canvas.drawLine(
             point1, point2, _determinePaint(siblingParentData.status!));
       }
@@ -222,30 +241,37 @@ class _RenderFlexSimpleStepper extends RenderFlex {
   }
 
   Paint _determinePaint(SimpleStepStatus status) {
+    final strokeWidth = _radius / 5;
     switch (status) {
       case SimpleStepStatus.done:
         return Paint()
           ..color = doneColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
+          ..strokeWidth = strokeWidth;
       case SimpleStepStatus.active:
         return Paint()
           ..color = activeColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
+          ..strokeWidth = strokeWidth;
       default_paint:
       case SimpleStepStatus.stale:
         return Paint()
           ..color = staleColor
-          ..style = PaintingStyle.fill
-          ..strokeWidth = 2.0;
+          ..strokeWidth = strokeWidth;
       case SimpleStepStatus.canceled:
         return Paint()
           ..color = canceledColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
+          ..strokeWidth = strokeWidth;
       default:
         continue default_paint;
     }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('radius', radius));
+    properties.add(ColorProperty('doneColor', doneColor));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(ColorProperty('staleColor', staleColor));
+    properties.add(ColorProperty('canceledColor', canceledColor));
   }
 }
