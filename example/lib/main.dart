@@ -56,11 +56,28 @@ class MyApp extends StatelessWidget {
         // ),
         body: Center(
           child: SimpleStepper(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            doneColor: Colors.blue,
+            activeColor: Colors.black,
+            staleColor: Colors.grey,
+            canceledColor: Colors.red,
+            // steps: <SimpleStep>[
+            //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
+            //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
+            //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
+            //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
+            // ],
+            // steps: <SimpleStep>[
+            //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
+            //   SimpleStep(label: 'two', status: SimpleStepStatus.done),
+            //   SimpleStep(label: 'three', status: SimpleStepStatus.done),
+            //   SimpleStep(label: 'four', status: SimpleStepStatus.canceled),
+            // ],
             steps: <SimpleStep>[
-              SimpleStep(label: 'text', status: SimpleStepStatus.done),
-              SimpleStep(label: 'text', status: SimpleStepStatus.active),
-              SimpleStep(label: 'text', status: SimpleStepStatus.active),
-              SimpleStep(label: 'text', status: SimpleStepStatus.active),
+              SimpleStep(label: 'one', status: SimpleStepStatus.done),
+              SimpleStep(label: 'two', status: SimpleStepStatus.active),
+              SimpleStep(label: 'three', status: SimpleStepStatus.stale),
+              SimpleStep(label: 'four', status: SimpleStepStatus.stale),
             ],
           ),
         ),
