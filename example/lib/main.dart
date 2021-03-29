@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+//import 'package:flutter/rendering.dart';
 import 'package:magical_widgets/magical_widgets.dart';
 
 void main() {
+  // debugRepaintRainbowEnabled = true;
   runApp(MyApp());
 }
 
@@ -55,38 +57,40 @@ class MyApp extends StatelessWidget {
         //   ),
         // ),
         body: Center(
-          child: SimpleStepper(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            doneColor: Colors.blue,
-            activeColor: Colors.black,
-            staleColor: Colors.grey,
-            canceledColor: Colors.red,
-            // steps: <SimpleStep>[
-            //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
-            //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
-            //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
-            //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
-            // ],
-            // steps: <SimpleStep>[
-            //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
-            //   SimpleStep(label: 'two', status: SimpleStepStatus.done),
-            //   SimpleStep(label: 'three', status: SimpleStepStatus.done),
-            //   SimpleStep(label: 'four', status: SimpleStepStatus.canceled),
-            // ],
-            // steps: <SimpleStep>[
-            //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
-            //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
-            //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
-            //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
-            // ],
-            steps: <SimpleStep>[
-              SimpleStep(label: 'first step', status: SimpleStepStatus.done),
-              SimpleStep(label: 'second step', status: SimpleStepStatus.done),
-              SimpleStep(label: 'third step', status: SimpleStepStatus.active),
-              SimpleStep(
-                  label: 'fourth step and my favorite',
-                  status: SimpleStepStatus.stale),
-            ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleStepper(
+              doneColor: Colors.blue,
+              activeColor: Colors.black,
+              staleColor: Colors.grey,
+              canceledColor: Colors.red,
+              // steps: <SimpleStep>[
+              //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
+              //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
+              //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
+              //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
+              // ],
+              // steps: <SimpleStep>[
+              //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
+              //   SimpleStep(label: 'two', status: SimpleStepStatus.done),
+              //   SimpleStep(label: 'three', status: SimpleStepStatus.done),
+              //   SimpleStep(label: 'four', status: SimpleStepStatus.canceled),
+              // ],
+              // steps: <SimpleStep>[
+              //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
+              //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
+              //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
+              //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
+              // ],
+              steps: <SimpleStep>[
+                SimpleStep(label: 'first step', status: SimpleStepStatus.done),
+                SimpleStep(label: 'second step', status: SimpleStepStatus.done),
+                SimpleStep(label: 'third step', status: SimpleStepStatus.active),
+                SimpleStep(
+                    label: 'fourth step and my favorite',
+                    status: SimpleStepStatus.stale),
+              ],
+            ),
           ),
         ),
       ),

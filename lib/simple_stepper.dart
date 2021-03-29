@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart' show Theme, Colors, Icons;
 
 enum SimpleStepStatus { done, active, stale, canceled }
 
@@ -37,7 +38,7 @@ class SimpleStep extends ParentDataWidget<_SimpleStepperParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty('status', status));
+    properties.add(EnumProperty<SimpleStepStatus>('status', status));
   }
 }
 
@@ -53,55 +54,69 @@ class _Step extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final diameter = _radius(context) * 2;
+    final radius = _radius(context);
+    final hollow =
+        status == SimpleStepStatus.active || status == SimpleStepStatus.stale;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Container(
-          height: diameter,
-          width: diameter,
+          height: radius * 2,
+          width: radius * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             // TODO: Change hard coded color.
-            color: _determineColor(context, status),
+            color: hollow ? null : _determineColor(context, status),
+            border: hollow
+                ? Border.all(
+                    color: _determineColor(context, status), width: radius / 5)
+                : null,
           ),
-          child: _determineChild(diameter, status),
+          child: _determineChild(radius, status),
         ),
-        Text(
-          label,
-          style: TextStyle(
-              color: status == SimpleStepStatus.stale
-                  ? SimpleStepper.of(context)?.staleColor
-                  : null,
-              fontSize: diameter / 3),
+        const SizedBox(height: 3),
+        Container(
+          height: radius * 4,
+          width: radius * 4,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                color: status == SimpleStepStatus.stale
+                    ? SimpleStepper.of(context)?.staleColor
+                    : null,
+                fontSize: radius * 0.7),
+          ),
         )
       ],
     );
   }
 
-  static Color? _determineColor(BuildContext context, SimpleStepStatus status) {
+  static Color _determineColor(BuildContext context, SimpleStepStatus status) {
     switch (status) {
       case SimpleStepStatus.done:
-        return SimpleStepper.of(context)?.doneColor;
+        return SimpleStepper.of(context)!.doneColor;
       case SimpleStepStatus.active:
-        return SimpleStepper.of(context)?.activeColor;
+        return SimpleStepper.of(context)!.activeColor;
       case SimpleStepStatus.stale:
-        return SimpleStepper.of(context)?.staleColor;
+        return SimpleStepper.of(context)!.staleColor;
       case SimpleStepStatus.canceled:
-        return SimpleStepper.of(context)?.canceledColor;
+        return SimpleStepper.of(context)!.canceledColor;
     }
   }
 
-  static Widget? _determineChild(double diameter, SimpleStepStatus status) {
+  static Widget? _determineChild(double radius, SimpleStepStatus status) {
     // TODO: Change hard coded color.
     switch (status) {
       case SimpleStepStatus.done:
-        return Icon(Icons.done, color: Colors.white, size: diameter / 2);
+        return Icon(Icons.done, color: Colors.white, size: radius * 1.5);
       case SimpleStepStatus.canceled:
-        return Icon(Icons.close, color: Colors.white, size: diameter / 2);
+        return Icon(Icons.close, color: Colors.white, size: radius * 1.5);
       case SimpleStepStatus.active:
       case SimpleStepStatus.stale:
-        return Icon(Icons.circle, color: Colors.white, size: diameter);
+        return null;
     }
   }
 }
@@ -130,6 +145,7 @@ class SimpleStepper extends Row {
   @override
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
+          textDirection: Directionality.of(context),
           radius: _Step._radius(context),
           mainAxisAlignment: mainAxisAlignment,
           doneColor: doneColor ?? Theme.of(context).primaryColor,
@@ -141,6 +157,7 @@ class SimpleStepper extends Row {
   void updateRenderObject(BuildContext context,
           covariant _RenderFlexSimpleStepper renderObject) =>
       renderObject
+        ..textDirection = Directionality.of(context)
         ..radius = _Step._radius(context)
         ..mainAxisAlignment = mainAxisAlignment
         ..doneColor = doneColor ?? Theme.of(context).primaryColor
@@ -151,7 +168,8 @@ class SimpleStepper extends Row {
 
 class _RenderFlexSimpleStepper extends RenderFlex {
   _RenderFlexSimpleStepper(
-      {required double radius,
+      {required TextDirection textDirection,
+      required double radius,
       required Color doneColor,
       required Color activeColor,
       required Color staleColor,
@@ -163,8 +181,7 @@ class _RenderFlexSimpleStepper extends RenderFlex {
         _staleColor = staleColor,
         _canceledColor = canceledColor,
         super(
-            textDirection: TextDirection.ltr,
-            mainAxisAlignment: mainAxisAlignment);
+            textDirection: textDirection, mainAxisAlignment: mainAxisAlignment);
 
   double get radius => _radius;
   double _radius;
@@ -230,8 +247,17 @@ class _RenderFlexSimpleStepper extends RenderFlex {
             sibling.parentData as _SimpleStepperParentData;
         final siblingOffset = siblingParentData.offset + offset;
         final dy = offset.dy + radius;
-        final point1 = Offset(childOffset.dx + child.size.width / 2, dy);
-        final point2 = Offset(siblingOffset.dx + sibling.size.width / 2, dy);
+        double? dx1 = childOffset.dx + radius * 3;
+        double? dx2 = siblingOffset.dx + radius;
+        if (textDirection == TextDirection.ltr) {
+          dx1 = childOffset.dx + radius * 3;
+          dx2 = siblingOffset.dx + radius;
+        } else {
+          dx1 = childOffset.dx + radius;
+          dx2 = siblingOffset.dx + radius * 3;
+        }
+        final point1 = Offset(dx1, dy);
+        final point2 = Offset(dx2, dy);
         context.canvas.drawLine(
             point1, point2, _determinePaint(siblingParentData.status!));
       }
