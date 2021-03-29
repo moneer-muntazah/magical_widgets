@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'flex_simple_stepper.dart';
 
 enum FlexSimpleStepStatus { done, active, stale, canceled }
 
@@ -19,6 +20,7 @@ class FlexSimpleStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(FlexSimpleStepper.of(context)?.staleColor);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[

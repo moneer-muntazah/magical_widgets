@@ -20,9 +20,13 @@ class FlexSimpleStepper extends Row {
   final Color? staleColor;
   final Color? canceledColor;
 
+  static _RenderFlexSimpleStepper? of(BuildContext context) =>
+      context.findAncestorRenderObjectOfType<_RenderFlexSimpleStepper>();
+
   @override
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
+          steps: steps,
           doneColor: doneColor ?? Theme.of(context).primaryColor,
           activeColor: activeColor ?? Theme.of(context).accentColor,
           staleColor: staleColor ?? Theme.of(context).disabledColor,
@@ -32,6 +36,7 @@ class FlexSimpleStepper extends Row {
   void updateRenderObject(BuildContext context,
           covariant _RenderFlexSimpleStepper renderObject) =>
       renderObject
+        ..steps = steps
         ..doneColor = doneColor ?? Theme.of(context).primaryColor
         ..activeColor = activeColor ?? Theme.of(context).accentColor
         ..staleColor = staleColor ?? Theme.of(context).disabledColor
@@ -40,17 +45,28 @@ class FlexSimpleStepper extends Row {
 
 class _RenderFlexSimpleStepper extends RenderFlex {
   _RenderFlexSimpleStepper(
-      {required Color doneColor,
+      {required List<FlexSimpleStep> steps,
+      required Color doneColor,
       required Color activeColor,
       required Color staleColor,
       required Color canceledColor})
-      : _doneColor = doneColor,
+      : _steps = steps,
+        _doneColor = doneColor,
         _activeColor = activeColor,
         _staleColor = staleColor,
         _canceledColor = canceledColor,
         super(
             textDirection: TextDirection.ltr,
             mainAxisAlignment: MainAxisAlignment.spaceAround);
+
+  List<FlexSimpleStep> get steps => _steps;
+  List<FlexSimpleStep> _steps;
+
+  set steps(List<FlexSimpleStep> value) {
+    if (_steps == value) return;
+    _steps = value;
+    markNeedsLayout();
+  }
 
   Color get doneColor => _doneColor;
   Color _doneColor;
@@ -90,8 +106,10 @@ class _RenderFlexSimpleStepper extends RenderFlex {
 
   @override
   void defaultPaint(PaintingContext context, Offset offset) {
+    int counter = 0;
     RenderBox? child = firstChild;
     while (child != null) {
+      print(steps[counter].status);
       final childParentData = child.parentData! as FlexParentData;
       final childOffset = childParentData.offset + offset;
       final sibling = childParentData.nextSibling;
@@ -113,34 +131,35 @@ class _RenderFlexSimpleStepper extends RenderFlex {
       }
       context.paintChild(child, childOffset);
       child = sibling;
+      counter++;
     }
   }
 
-  // Paint _determinePaint(FlexSimpleStepStatus status) {
-  //   switch (status) {
-  //     case FlexSimpleStepStatus.done:
-  //       return Paint()
-  //         ..color = doneColor
-  //         ..style = PaintingStyle.stroke
-  //         ..strokeWidth = 2.0;
-  //     case FlexSimpleStepStatus.active:
-  //       return Paint()
-  //         ..color = activeColor
-  //         ..style = PaintingStyle.stroke
-  //         ..strokeWidth = 2.0;
-  //     default_paint:
-  //     case FlexSimpleStepStatus.stale:
-  //       return Paint()
-  //         ..color = staleColor
-  //         ..style = PaintingStyle.fill
-  //         ..strokeWidth = 2.0;
-  //     case FlexSimpleStepStatus.canceled:
-  //       return Paint()
-  //         ..color = canceledColor
-  //         ..style = PaintingStyle.stroke
-  //         ..strokeWidth = 2.0;
-  //     default:
-  //       continue default_paint;
-  //   }
-  // }
+// Paint _determinePaint(FlexSimpleStepStatus status) {
+//   switch (status) {
+//     case FlexSimpleStepStatus.done:
+//       return Paint()
+//         ..color = doneColor
+//         ..style = PaintingStyle.stroke
+//         ..strokeWidth = 2.0;
+//     case FlexSimpleStepStatus.active:
+//       return Paint()
+//         ..color = activeColor
+//         ..style = PaintingStyle.stroke
+//         ..strokeWidth = 2.0;
+//     default_paint:
+//     case FlexSimpleStepStatus.stale:
+//       return Paint()
+//         ..color = staleColor
+//         ..style = PaintingStyle.fill
+//         ..strokeWidth = 2.0;
+//     case FlexSimpleStepStatus.canceled:
+//       return Paint()
+//         ..color = canceledColor
+//         ..style = PaintingStyle.stroke
+//         ..strokeWidth = 2.0;
+//     default:
+//       continue default_paint;
+//   }
+// }
 }
