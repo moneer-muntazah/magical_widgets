@@ -55,12 +55,12 @@ class MyApp extends StatelessWidget {
         //   ),
         // ),
         body: Center(
-          child: FlexSimpleStepper(
-            steps: <FlexSimpleStep>[
-              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.done),
-              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.active),
-              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.active),
-              FlexSimpleStep(label: 'text', status: FlexSimpleStepStatus.active),
+          child: SimpleStepper(
+            steps: <SimpleStep>[
+              SimpleStep(label: 'text', status: SimpleStepStatus.done),
+              SimpleStep(label: 'text', status: SimpleStepStatus.active),
+              SimpleStep(label: 'text', status: SimpleStepStatus.active),
+              SimpleStep(label: 'text', status: SimpleStepStatus.active),
             ],
           ),
         ),

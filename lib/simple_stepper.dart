@@ -1,11 +1,63 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
-import 'flex_simple_step.dart';
 
-export 'flex_simple_step.dart';
+enum SimpleStepStatus { done, active, stale, canceled }
 
-class FlexSimpleStepper extends Row {
-  FlexSimpleStepper(
+class _SimpleStepperParentData extends FlexParentData {
+  SimpleStepStatus? status;
+}
+
+class SimpleStep extends ParentDataWidget<_SimpleStepperParentData> {
+  SimpleStep({Key? key, required String label, required this.status})
+      : super(
+          key: key,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.pink,
+                ),
+                child: Icon(Icons.done),
+              ),
+              Text(label)
+            ],
+          ),
+        );
+
+  final SimpleStepStatus status;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is _SimpleStepperParentData);
+    final parentData = renderObject.parentData! as _SimpleStepperParentData;
+    bool needsPaint = false;
+
+    if (parentData.status != status) {
+      parentData.status = status;
+      needsPaint = true;
+    }
+
+    if (needsPaint) {
+      final targetParent = renderObject.parent;
+      if (targetParent is RenderObject) targetParent.markNeedsPaint();
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Flex;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty('status', status));
+  }
+}
+
+class SimpleStepper extends Row {
+  SimpleStepper(
       {Key? key,
       required this.steps,
       this.doneColor,
@@ -14,7 +66,7 @@ class FlexSimpleStepper extends Row {
       this.canceledColor})
       : super(key: key, children: steps);
 
-  final List<FlexSimpleStep> steps;
+  final List<SimpleStep> steps;
   final Color? doneColor;
   final Color? activeColor;
   final Color? staleColor;
@@ -26,7 +78,6 @@ class FlexSimpleStepper extends Row {
   @override
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
-          steps: steps,
           doneColor: doneColor ?? Theme.of(context).primaryColor,
           activeColor: activeColor ?? Theme.of(context).accentColor,
           staleColor: staleColor ?? Theme.of(context).disabledColor,
@@ -36,7 +87,6 @@ class FlexSimpleStepper extends Row {
   void updateRenderObject(BuildContext context,
           covariant _RenderFlexSimpleStepper renderObject) =>
       renderObject
-        ..steps = steps
         ..doneColor = doneColor ?? Theme.of(context).primaryColor
         ..activeColor = activeColor ?? Theme.of(context).accentColor
         ..staleColor = staleColor ?? Theme.of(context).disabledColor
@@ -45,28 +95,17 @@ class FlexSimpleStepper extends Row {
 
 class _RenderFlexSimpleStepper extends RenderFlex {
   _RenderFlexSimpleStepper(
-      {required List<FlexSimpleStep> steps,
-      required Color doneColor,
+      {required Color doneColor,
       required Color activeColor,
       required Color staleColor,
       required Color canceledColor})
-      : _steps = steps,
-        _doneColor = doneColor,
+      : _doneColor = doneColor,
         _activeColor = activeColor,
         _staleColor = staleColor,
         _canceledColor = canceledColor,
         super(
             textDirection: TextDirection.ltr,
             mainAxisAlignment: MainAxisAlignment.spaceAround);
-
-  List<FlexSimpleStep> get steps => _steps;
-  List<FlexSimpleStep> _steps;
-
-  set steps(List<FlexSimpleStep> value) {
-    if (_steps == value) return;
-    _steps = value;
-    markNeedsLayout();
-  }
 
   Color get doneColor => _doneColor;
   Color _doneColor;
@@ -105,16 +144,23 @@ class _RenderFlexSimpleStepper extends RenderFlex {
   }
 
   @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _SimpleStepperParentData) {
+      child.parentData = _SimpleStepperParentData();
+    }
+  }
+
+  @override
   void defaultPaint(PaintingContext context, Offset offset) {
-    int counter = 0;
     RenderBox? child = firstChild;
     while (child != null) {
-      print(steps[counter].status);
-      final childParentData = child.parentData! as FlexParentData;
+      final childParentData = child.parentData! as _SimpleStepperParentData;
+      print(childParentData.status);
       final childOffset = childParentData.offset + offset;
       final sibling = childParentData.nextSibling;
       if (sibling != null) {
-        final siblingParentData = sibling.parentData as FlexParentData;
+        final siblingParentData =
+            sibling.parentData as _SimpleStepperParentData;
         final siblingOffset = siblingParentData.offset + offset;
         final point1 = Offset(childOffset.dx + child.size.width / 2,
             childOffset.dy + child.size.width / 2);
@@ -131,7 +177,6 @@ class _RenderFlexSimpleStepper extends RenderFlex {
       }
       context.paintChild(child, childOffset);
       child = sibling;
-      counter++;
     }
   }
 
