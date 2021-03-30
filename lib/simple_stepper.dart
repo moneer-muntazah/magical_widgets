@@ -12,24 +12,24 @@ enum SimpleStepState { done, active, stale, canceled, skip }
 /// Used in order to have access to the states that the nodes represent during
 /// the painting process. We have to extend [FlexParentData] because it is
 /// the class used by [RenderFlex].
-class _SimpleStepperParentData extends FlexParentData {
+class SimpleStepperParentData extends FlexParentData {
   SimpleStepState? state;
 }
 
 /// Similar to [Flexible], this is the class exposed to the user. It wraps
-/// [_SimpleStepNode] and applies [ParentData].
+/// [SimpleStepNode] and applies [ParentData].
 /// No need to apply the other properties from [FlexParentData] since they are
 /// not used with this implementation.
-class SimpleStep extends ParentDataWidget<_SimpleStepperParentData> {
+class SimpleStep extends ParentDataWidget<SimpleStepperParentData> {
   SimpleStep({Key? key, required String label, required this.state})
-      : super(key: key, child: _SimpleStepNode(state: state, label: label));
+      : super(key: key, child: SimpleStepNode(state: state, label: label));
 
   final SimpleStepState state;
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is _SimpleStepperParentData);
-    final parentData = renderObject.parentData! as _SimpleStepperParentData;
+    assert(renderObject.parentData is SimpleStepperParentData);
+    final parentData = renderObject.parentData! as SimpleStepperParentData;
     var needsPaint = false;
 
     if (parentData.state != state) {
@@ -55,8 +55,8 @@ class SimpleStep extends ParentDataWidget<_SimpleStepperParentData> {
 
 /// This is the actual widget that describes every step. If you need to modify
 /// the UI, this is where you most likely going to work.
-class _SimpleStepNode extends StatelessWidget {
-  const _SimpleStepNode(
+class SimpleStepNode extends StatelessWidget {
+  const SimpleStepNode(
       {Key? key,
       required this.state,
       required this.label,
@@ -175,7 +175,7 @@ class SimpleStepper extends Row {
   final Color? canceledColor;
   final Color? skipColor;
 
-  /// Used so that [_SimpleStepNode] can have access to the color properties
+  /// Used so that [SimpleStepNode] can have access to the color properties
   /// set in [_RenderFlexSimpleStepper].
   static _RenderFlexSimpleStepper? of(BuildContext context) =>
       context.findAncestorRenderObjectOfType<_RenderFlexSimpleStepper>();
@@ -184,12 +184,12 @@ class SimpleStepper extends Row {
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
           textDirection: Directionality.of(context),
-          radius: _SimpleStepNode.baseRadius(context),
+          radius: SimpleStepNode.baseRadius(context),
           mainAxisAlignment: mainAxisAlignment,
           doneColor: doneColor ?? Theme.of(context).primaryColor,
           activeColor: activeColor ?? Theme.of(context).accentColor,
           staleColor: staleColor ?? Theme.of(context).disabledColor,
-          canceledColor: canceledColor ?? Theme.of(context).disabledColor,
+          canceledColor: canceledColor ?? Theme.of(context).primaryColor,
           skipColor: skipColor ?? Theme.of(context).primaryColor);
 
   @override
@@ -197,17 +197,20 @@ class SimpleStepper extends Row {
           covariant _RenderFlexSimpleStepper renderObject) =>
       renderObject
         ..textDirection = Directionality.of(context)
-        ..radius = _SimpleStepNode.baseRadius(context)
+        ..radius = SimpleStepNode.baseRadius(context)
         ..mainAxisAlignment = mainAxisAlignment
         ..doneColor = doneColor ?? Theme.of(context).primaryColor
         ..activeColor = activeColor ?? Theme.of(context).accentColor
         ..staleColor = staleColor ?? Theme.of(context).disabledColor
-        ..canceledColor = canceledColor ?? Theme.of(context).disabledColor
+        ..canceledColor = canceledColor ?? Theme.of(context).primaryColor
         ..skipColor = skipColor ?? Theme.of(context).primaryColor;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(EnumProperty<MainAxisAlignment>(
+        'mainAxisAlignment', mainAxisAlignment,
+        defaultValue: MainAxisAlignment.spaceAround));
     properties.add(ColorProperty('doneColor', doneColor));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('staleColor', staleColor));
@@ -293,8 +296,8 @@ class _RenderFlexSimpleStepper extends RenderFlex {
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _SimpleStepperParentData) {
-      child.parentData = _SimpleStepperParentData();
+    if (child.parentData is! SimpleStepperParentData) {
+      child.parentData = SimpleStepperParentData();
     }
   }
 
@@ -304,12 +307,11 @@ class _RenderFlexSimpleStepper extends RenderFlex {
   void defaultPaint(PaintingContext context, Offset offset) {
     var child = firstChild;
     while (child != null) {
-      final childParentData = child.parentData! as _SimpleStepperParentData;
+      final childParentData = child.parentData! as SimpleStepperParentData;
       final childOffset = childParentData.offset + offset;
       final sibling = childParentData.nextSibling;
       if (sibling != null) {
-        final siblingParentData =
-            sibling.parentData as _SimpleStepperParentData;
+        final siblingParentData = sibling.parentData as SimpleStepperParentData;
         final siblingOffset = siblingParentData.offset + offset;
         final dy = offset.dy + radius;
         double? dx1 = childOffset.dx + radius * 3;
