@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 //import 'package:flutter/rendering.dart';
 import 'package:magical_widgets/magical_widgets.dart';
 
@@ -51,7 +52,7 @@ class MyApp extends StatelessWidget {
         //     child: SimpleStepper(
         //       activeColor: Colors.orange.shade700,
         //       steps: <SimpleStep>[
-        //         SimpleStep(text: 'text', status: SimpleStepStatus.present)
+        //         SimpleStep(text: 'text', state: SimpleStepState.present)
         //       ],
         //     ),
         //   ),
@@ -65,30 +66,46 @@ class MyApp extends StatelessWidget {
               staleColor: Colors.grey,
               canceledColor: Colors.red,
               // steps: <SimpleStep>[
-              //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
-              //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
-              //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
-              //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
+              //   SimpleStep(label: 'one', state: SimpleStepState.done),
+              //   SimpleStep(label: 'two', state: SimpleStepState.active),
+              //   SimpleStep(label: 'three', state: SimpleStepState.stale),
+              //   SimpleStep(label: 'four', state: SimpleStepState.stale),
               // ],
               // steps: <SimpleStep>[
-              //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
-              //   SimpleStep(label: 'two', status: SimpleStepStatus.done),
-              //   SimpleStep(label: 'three', status: SimpleStepStatus.done),
-              //   SimpleStep(label: 'four', status: SimpleStepStatus.canceled),
+              //   SimpleStep(label: 'one', state: SimpleStepState.done),
+              //   SimpleStep(label: 'two', state: SimpleStepState.done),
+              //   SimpleStep(label: 'three', state: SimpleStepState.done),
+              //   SimpleStep(label: 'four', state: SimpleStepState.canceled),
               // ],
               // steps: <SimpleStep>[
-              //   SimpleStep(label: 'one', status: SimpleStepStatus.done),
-              //   SimpleStep(label: 'two', status: SimpleStepStatus.active),
-              //   SimpleStep(label: 'three', status: SimpleStepStatus.stale),
-              //   SimpleStep(label: 'four', status: SimpleStepStatus.stale),
+              //   SimpleStep(label: 'one', state: SimpleStepState.done),
+              //   SimpleStep(label: 'two', state: SimpleStepState.active),
+              //   SimpleStep(label: 'three', state: SimpleStepState.stale),
+              //   SimpleStep(label: 'four', state: SimpleStepState.stale),
+              // ],
+              // steps: <SimpleStep>[
+              //   SimpleStep(label: 'first step', state: SimpleStepState.done),
+              //   SimpleStep(label: 'second step', state: SimpleStepState.done),
+              //   SimpleStep(label: 'third step', state: SimpleStepState.active),
+              //   SimpleStep(
+              //       label: 'fourth step and my favorite',
+              //       state: SimpleStepState.stale),
+              // ],
+              // steps: <SimpleStep>[
+              //   SimpleStep(label: 'first step', state: SimpleStepState.done),
+              //   SimpleStep(label: 'second step', state: SimpleStepState.done),
+              //   SimpleStep(label: 'third step', state: SimpleStepState.done),
+              //   SimpleStep(
+              //       label: 'fourth step and my favorite',
+              //       state: SimpleStepState.stale),
               // ],
               steps: <SimpleStep>[
-                SimpleStep(label: 'first step', status: SimpleStepStatus.done),
-                SimpleStep(label: 'second step', status: SimpleStepStatus.done),
-                SimpleStep(label: 'third step', status: SimpleStepStatus.active),
+                SimpleStep(label: 'first step', state: SimpleStepState.done),
+                SimpleStep(label: 'second step', state: SimpleStepState.skip),
+                SimpleStep(label: 'third step', state: SimpleStepState.skip),
                 SimpleStep(
                     label: 'fourth step and my favorite',
-                    status: SimpleStepStatus.stale),
+                    state: SimpleStepState.canceled),
               ],
             ),
           ),

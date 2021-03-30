@@ -1,28 +1,39 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show Theme, Colors, Icons;
 
-enum SimpleStepStatus { done, active, stale, canceled }
+/// These are the states that the nodes represent
+/// [SimpleStepState.active], [SimpleStepState.stale], and
+/// [SimpleStepState.skip] are hollowed- have no icons.
+/// [SimpleStepper] have color properties that correspond to these states,
+/// and use the same naming convention.
+enum SimpleStepState { done, active, stale, canceled, skip }
 
+/// Used in order to have access to the states that the nodes represent during
+/// the painting process. We have to extend [FlexParentData] because it is
+/// the class used by [RenderFlex].
 class _SimpleStepperParentData extends FlexParentData {
-  SimpleStepStatus? status;
+  SimpleStepState? state;
 }
 
+/// Similar to [Flexible], this is the class exposed to the user. It wraps
+/// [_SimpleStepNode] and applies [ParentData].
+/// No need to apply the other properties from [FlexParentData] since they are
+/// not used with this implementation.
 class SimpleStep extends ParentDataWidget<_SimpleStepperParentData> {
-  SimpleStep({Key? key, required String label, required this.status})
-      : super(key: key, child: _Step(status: status, label: label));
+  SimpleStep({Key? key, required String label, required this.state})
+      : super(key: key, child: _SimpleStepNode(state: state, label: label));
 
-  final SimpleStepStatus status;
+  final SimpleStepState state;
 
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is _SimpleStepperParentData);
     final parentData = renderObject.parentData! as _SimpleStepperParentData;
-    bool needsPaint = false;
+    var needsPaint = false;
 
-    if (parentData.status != status) {
-      parentData.status = status;
+    if (parentData.state != state) {
+      parentData.state = state;
       needsPaint = true;
     }
 
@@ -38,25 +49,41 @@ class SimpleStep extends ParentDataWidget<_SimpleStepperParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<SimpleStepStatus>('status', status));
+    properties.add(EnumProperty<SimpleStepState>('state', state));
   }
 }
 
-class _Step extends StatelessWidget {
-  const _Step({Key? key, required this.status, required this.label})
+/// This is the actual widget that describes every step. If you need to modify
+/// the UI, this is where you most likely going to work.
+class _SimpleStepNode extends StatelessWidget {
+  const _SimpleStepNode(
+      {Key? key,
+      required this.state,
+      required this.label,
+      this.iconColor = Colors.white})
       : super(key: key);
 
-  static double _radius(BuildContext context) =>
+  /// This is the function which the proportionality of the design is based on.
+  static double baseRadius(BuildContext context) =>
       MediaQuery.of(context).size.width * 0.08 / 2;
 
-  final SimpleStepStatus status;
+  /// The state that the node represents.
+  final SimpleStepState state;
+
+  /// The text shown under the node
   final String label;
+
+  /// If the node has an icon, this property defines its color.
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    final radius = _radius(context);
-    final hollow =
-        status == SimpleStepStatus.active || status == SimpleStepStatus.stale;
+    final radius = baseRadius(context);
+    final hollow = <SimpleStepState>[
+      SimpleStepState.active,
+      SimpleStepState.stale,
+      SimpleStepState.skip
+    ].contains(state);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -65,14 +92,13 @@ class _Step extends StatelessWidget {
           width: radius * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            // TODO: Change hard coded color.
-            color: hollow ? null : _determineColor(context, status),
+            color: hollow ? null : _determineColor(context, state),
             border: hollow
                 ? Border.all(
-                    color: _determineColor(context, status), width: radius / 5)
+                    color: _determineColor(context, state), width: radius / 5)
                 : null,
           ),
-          child: _determineChild(radius, status),
+          child: _determineChild(context, state),
         ),
         const SizedBox(height: 3),
         Container(
@@ -84,7 +110,7 @@ class _Step extends StatelessWidget {
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-                color: status == SimpleStepStatus.stale
+                color: state == SimpleStepState.stale
                     ? SimpleStepper.of(context)?.staleColor
                     : null,
                 fontSize: radius * 0.7),
@@ -94,51 +120,63 @@ class _Step extends StatelessWidget {
     );
   }
 
-  static Color _determineColor(BuildContext context, SimpleStepStatus status) {
-    switch (status) {
-      case SimpleStepStatus.done:
+  Color _determineColor(BuildContext context, SimpleStepState state) {
+    switch (state) {
+      case SimpleStepState.done:
         return SimpleStepper.of(context)!.doneColor;
-      case SimpleStepStatus.active:
+      case SimpleStepState.active:
         return SimpleStepper.of(context)!.activeColor;
-      case SimpleStepStatus.stale:
+      case SimpleStepState.stale:
         return SimpleStepper.of(context)!.staleColor;
-      case SimpleStepStatus.canceled:
+      case SimpleStepState.canceled:
         return SimpleStepper.of(context)!.canceledColor;
+      case SimpleStepState.skip:
+        return SimpleStepper.of(context)!.skipColor;
     }
   }
 
-  static Widget? _determineChild(double radius, SimpleStepStatus status) {
-    // TODO: Change hard coded color.
-    switch (status) {
-      case SimpleStepStatus.done:
-        return Icon(Icons.done, color: Colors.white, size: radius * 1.5);
-      case SimpleStepStatus.canceled:
-        return Icon(Icons.close, color: Colors.white, size: radius * 1.5);
-      case SimpleStepStatus.active:
-      case SimpleStepStatus.stale:
+  Widget? _determineChild(BuildContext context, SimpleStepState state) {
+    switch (state) {
+      case SimpleStepState.done:
+        return Icon(Icons.done,
+            color: iconColor, size: baseRadius(context) * 1.5);
+      case SimpleStepState.canceled:
+        return Icon(Icons.close,
+            color: iconColor, size: baseRadius(context) * 1.5);
+      case SimpleStepState.active:
+      case SimpleStepState.stale:
+      case SimpleStepState.skip:
         return null;
     }
   }
 }
 
+/// [SimpleStepper] is our [MultiChildRenderObjectWidget]. The [Row] widget
+/// has most of the default behavior we need so we extend it, and add the
+/// additional properties that will later be passed to
+/// [_RenderFlexSimpleStepper]
 class SimpleStepper extends Row {
   SimpleStepper(
       {Key? key,
-      required this.steps,
+      required List<SimpleStep> steps,
       this.mainAxisAlignment = MainAxisAlignment.spaceAround,
       this.doneColor,
       this.activeColor,
       this.staleColor,
-      this.canceledColor})
-      : super(key: key, children: steps);
+      this.canceledColor,
+      this.skipColor})
+      : super(key: key, children: steps, mainAxisAlignment: mainAxisAlignment);
 
-  final List<SimpleStep> steps;
+  @override
   final MainAxisAlignment mainAxisAlignment;
   final Color? doneColor;
   final Color? activeColor;
   final Color? staleColor;
   final Color? canceledColor;
+  final Color? skipColor;
 
+  /// Used so that [_SimpleStepNode] can have access to the color properties
+  /// set in [_RenderFlexSimpleStepper].
   static _RenderFlexSimpleStepper? of(BuildContext context) =>
       context.findAncestorRenderObjectOfType<_RenderFlexSimpleStepper>();
 
@@ -146,40 +184,56 @@ class SimpleStepper extends Row {
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
           textDirection: Directionality.of(context),
-          radius: _Step._radius(context),
+          radius: _SimpleStepNode.baseRadius(context),
           mainAxisAlignment: mainAxisAlignment,
           doneColor: doneColor ?? Theme.of(context).primaryColor,
           activeColor: activeColor ?? Theme.of(context).accentColor,
           staleColor: staleColor ?? Theme.of(context).disabledColor,
-          canceledColor: canceledColor ?? Theme.of(context).disabledColor);
+          canceledColor: canceledColor ?? Theme.of(context).disabledColor,
+          skipColor: skipColor ?? Theme.of(context).primaryColor);
 
   @override
   void updateRenderObject(BuildContext context,
           covariant _RenderFlexSimpleStepper renderObject) =>
       renderObject
         ..textDirection = Directionality.of(context)
-        ..radius = _Step._radius(context)
+        ..radius = _SimpleStepNode.baseRadius(context)
         ..mainAxisAlignment = mainAxisAlignment
         ..doneColor = doneColor ?? Theme.of(context).primaryColor
         ..activeColor = activeColor ?? Theme.of(context).accentColor
         ..staleColor = staleColor ?? Theme.of(context).disabledColor
-        ..canceledColor = canceledColor ?? Theme.of(context).disabledColor;
+        ..canceledColor = canceledColor ?? Theme.of(context).disabledColor
+        ..skipColor = skipColor ?? Theme.of(context).primaryColor;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('doneColor', doneColor));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(ColorProperty('staleColor', staleColor));
+    properties.add(ColorProperty('canceledColor', canceledColor));
+    properties.add(ColorProperty('skipColor', skipColor));
+  }
 }
 
+/// [_RenderFlexSimpleStepper] is our [RenderObject]. [RenderFlex] is
+/// convenient to subclass since it has most of behavior we need.
 class _RenderFlexSimpleStepper extends RenderFlex {
   _RenderFlexSimpleStepper(
       {required TextDirection textDirection,
+      required MainAxisAlignment mainAxisAlignment,
       required double radius,
       required Color doneColor,
       required Color activeColor,
       required Color staleColor,
       required Color canceledColor,
-      required MainAxisAlignment mainAxisAlignment})
+      required Color skipColor})
       : _radius = radius,
         _doneColor = doneColor,
         _activeColor = activeColor,
         _staleColor = staleColor,
         _canceledColor = canceledColor,
+        _skipColor = skipColor,
         super(
             textDirection: textDirection, mainAxisAlignment: mainAxisAlignment);
 
@@ -228,6 +282,15 @@ class _RenderFlexSimpleStepper extends RenderFlex {
     markNeedsPaint();
   }
 
+  Color get skipColor => _skipColor;
+  Color _skipColor;
+
+  set skipColor(Color value) {
+    if (_skipColor == value) return;
+    _skipColor = value;
+    markNeedsPaint();
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! _SimpleStepperParentData) {
@@ -235,9 +298,11 @@ class _RenderFlexSimpleStepper extends RenderFlex {
     }
   }
 
+  /// [defaultPaint] is called the overridden paint method in [RenderFlex].
+  /// We override in order to paint the lines in between our nodes.
   @override
   void defaultPaint(PaintingContext context, Offset offset) {
-    RenderBox? child = firstChild;
+    var child = firstChild;
     while (child != null) {
       final childParentData = child.parentData! as _SimpleStepperParentData;
       final childOffset = childParentData.offset + offset;
@@ -259,35 +324,36 @@ class _RenderFlexSimpleStepper extends RenderFlex {
         final point1 = Offset(dx1, dy);
         final point2 = Offset(dx2, dy);
         context.canvas.drawLine(
-            point1, point2, _determinePaint(siblingParentData.status!));
+            point1, point2, _determinePaint(siblingParentData.state!));
       }
       context.paintChild(child, childOffset);
       child = sibling;
     }
   }
 
-  Paint _determinePaint(SimpleStepStatus status) {
+  Paint _determinePaint(SimpleStepState state) {
     final strokeWidth = _radius / 5;
-    switch (status) {
-      case SimpleStepStatus.done:
+    switch (state) {
+      case SimpleStepState.done:
         return Paint()
           ..color = doneColor
           ..strokeWidth = strokeWidth;
-      case SimpleStepStatus.active:
+      case SimpleStepState.active:
         return Paint()
           ..color = activeColor
           ..strokeWidth = strokeWidth;
-      default_paint:
-      case SimpleStepStatus.stale:
+      case SimpleStepState.stale:
         return Paint()
           ..color = staleColor
           ..strokeWidth = strokeWidth;
-      case SimpleStepStatus.canceled:
+      case SimpleStepState.canceled:
         return Paint()
           ..color = canceledColor
           ..strokeWidth = strokeWidth;
-      default:
-        continue default_paint;
+      case SimpleStepState.skip:
+        return Paint()
+          ..color = skipColor
+          ..strokeWidth = strokeWidth;
     }
   }
 
@@ -299,5 +365,6 @@ class _RenderFlexSimpleStepper extends RenderFlex {
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('staleColor', staleColor));
     properties.add(ColorProperty('canceledColor', canceledColor));
+    properties.add(ColorProperty('skipColor', skipColor));
   }
 }
