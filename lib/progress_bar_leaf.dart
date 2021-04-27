@@ -37,8 +37,6 @@ class ProgressBarLeaf extends LeafRenderObjectWidget {
 }
 
 class _RenderProgressBarLeaf extends RenderBox {
-  static const _minDesiredWidth = 100.0;
-
   _RenderProgressBarLeaf(
       {required Color barColor,
       required Color thumbColor,
@@ -46,6 +44,8 @@ class _RenderProgressBarLeaf extends RenderBox {
       : _barColor = barColor,
         _thumbColor = thumbColor,
         _thumbSize = thumbSize;
+
+  static const _minDesiredWidth = 100.0;
 
   Color get barColor => _barColor;
   Color _barColor;
@@ -74,7 +74,7 @@ class _RenderProgressBarLeaf extends RenderBox {
     markNeedsLayout();
   }
 
-  double _currentThumbValue = 0.5;
+  final _currentThumbValue = 0.5;
 
   @override
   double computeMinIntrinsicWidth(double height) => _minDesiredWidth;
