@@ -18,26 +18,45 @@ class SimpleStepperParentData extends FlexParentData {
 
 /// Similar to [Flexible], this is the class exposed to the user. It wraps
 /// [SimpleStepNode] and applies [ParentData].
-/// No need to apply the other properties from [FlexParentData] since they are
-/// not used with this implementation.
 class SimpleStep extends ParentDataWidget<SimpleStepperParentData> {
-  SimpleStep({Key? key, required String label, required this.state})
+  SimpleStep(
+      {Key? key,
+      this.flex = 1,
+      this.fit = FlexFit.loose,
+      required String label,
+      required this.state})
       : super(key: key, child: SimpleStepNode(state: state, label: label));
 
+  final int flex;
+  final FlexFit fit;
   final SimpleStepState state;
 
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is SimpleStepperParentData);
     final parentData = renderObject.parentData as SimpleStepperParentData;
+    var needsLayout = false;
     var needsPaint = false;
+
+    if (parentData.flex != flex) {
+      parentData.flex = flex;
+      needsLayout = true;
+    }
+
+    if (parentData.fit != fit) {
+      parentData.fit = fit;
+      needsLayout = true;
+    }
 
     if (parentData.state != state) {
       parentData.state = state;
       needsPaint = true;
     }
 
-    if (needsPaint) {
+    if (needsLayout) {
+      final targetParent = renderObject.parent;
+      if (targetParent is RenderObject) targetParent.markNeedsLayout();
+    } else if (needsPaint) {
       final targetParent = renderObject.parent;
       if (targetParent is RenderObject) targetParent.markNeedsPaint();
     }
@@ -158,7 +177,7 @@ class SimpleStepper extends Row {
   SimpleStepper(
       {Key? key,
       required List<SimpleStep> steps,
-      MainAxisAlignment mainAxisAlignment = MainAxisAlignment.spaceAround,
+      MainAxisAlignment mainAxisAlignment = MainAxisAlignment.spaceBetween,
       this.doneColor,
       this.activeColor,
       this.staleColor,
