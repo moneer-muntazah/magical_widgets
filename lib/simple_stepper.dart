@@ -83,7 +83,7 @@ class SimpleStepNode extends StatelessWidget {
       : super(key: key);
 
   /// This is the function which the proportionality of the design is based on.
-  static double radius(BuildContext context) =>
+  static double _radius(BuildContext context) =>
       MediaQuery.of(context).size.width * 0.035;
 
   /// The state that the node represents.
@@ -97,7 +97,7 @@ class SimpleStepNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = radius(context);
+    final r = _radius(context);
     final diameter = r * 2;
     final hollow = <SimpleStepState>[
       SimpleStepState.active,
@@ -130,7 +130,7 @@ class SimpleStepNode extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
                 color: state == SimpleStepState.stale
-                    ? SimpleStepper.of(context)?.staleColor
+                    ? SimpleStepper._of(context)?.staleColor
                     : null,
                 fontSize: r * 0.8),
           ),
@@ -142,20 +142,20 @@ class SimpleStepNode extends StatelessWidget {
   Color _determineColor(BuildContext context, SimpleStepState state) {
     switch (state) {
       case SimpleStepState.done:
-        return SimpleStepper.of(context)!.doneColor;
+        return SimpleStepper._of(context)!.doneColor;
       case SimpleStepState.active:
-        return SimpleStepper.of(context)!.activeColor;
+        return SimpleStepper._of(context)!.activeColor;
       case SimpleStepState.stale:
-        return SimpleStepper.of(context)!.staleColor;
+        return SimpleStepper._of(context)!.staleColor;
       case SimpleStepState.canceled:
-        return SimpleStepper.of(context)!.canceledColor;
+        return SimpleStepper._of(context)!.canceledColor;
       case SimpleStepState.skip:
-        return SimpleStepper.of(context)!.skipColor;
+        return SimpleStepper._of(context)!.skipColor;
     }
   }
 
   Widget? _determineChild(BuildContext context, SimpleStepState state) {
-    double iconSize() => radius(context) * 1.5;
+    double iconSize() => _radius(context) * 1.5;
     switch (state) {
       case SimpleStepState.done:
         return Icon(Icons.done, color: iconColor, size: iconSize());
@@ -193,14 +193,14 @@ class SimpleStepper extends Row {
 
   /// Used so that [SimpleStepNode] can have access to the color properties
   /// set in [_RenderFlexSimpleStepper].
-  static _RenderFlexSimpleStepper? of(BuildContext context) =>
+  static _RenderFlexSimpleStepper? _of(BuildContext context) =>
       context.findAncestorRenderObjectOfType<_RenderFlexSimpleStepper>();
 
   @override
   RenderFlex createRenderObject(BuildContext context) =>
       _RenderFlexSimpleStepper(
           textDirection: Directionality.of(context),
-          radius: SimpleStepNode.radius(context),
+          radius: SimpleStepNode._radius(context),
           mainAxisAlignment: mainAxisAlignment,
           doneColor: doneColor ?? Theme.of(context).primaryColor,
           activeColor: activeColor ?? Theme.of(context).accentColor,
@@ -213,7 +213,7 @@ class SimpleStepper extends Row {
           covariant _RenderFlexSimpleStepper renderObject) =>
       renderObject
         ..textDirection = Directionality.of(context)
-        ..radius = SimpleStepNode.radius(context)
+        ..radius = SimpleStepNode._radius(context)
         ..mainAxisAlignment = mainAxisAlignment
         ..doneColor = doneColor ?? Theme.of(context).primaryColor
         ..activeColor = activeColor ?? Theme.of(context).accentColor
